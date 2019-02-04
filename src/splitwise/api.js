@@ -1,4 +1,5 @@
 const SplitwiseClient = require('splitwise');
+const CURRENCY = 'USD';
 
 const notFoundHandler = (err) => {
     if(err.message && err.message.indexOf('record not found') > -1) {
@@ -8,6 +9,21 @@ const notFoundHandler = (err) => {
     throw err;
 }
 
+const findBalance = (balances) => {
+    const balance = balances.find(({currency_code}) => (currency_code === CURRENCY));
+
+    if(!balance) {
+        return 0.00;
+    }
+
+    return parseFloat(balance.amount);
+}
+
+const mapMember = (member) => ({
+    ...member,
+    id: member.id.toString(),
+    balance: findBalance(member.balance)
+})
 
 class Api {
     constructor({consumerKey, consumerSecret, groupId, cashierId}) {
@@ -29,9 +45,26 @@ class Api {
     }
     getUsers() {
         return this.getGroup()
-            .then(({members}) => members)
+            .then(({members}) => members.map(mapMember))
+            .then((members) => members.filter(({id}) => (id !== this.cashierId)))
+    }
+    getBalance() {
+        return this.getGroup()
+            .then(({members}) => members.map(mapMember))
+            .then((members) => members.find(({id}) => (id === this.cashierId)))
+            .then((member) => {
+                if(!member) {
+                    throw new Error("Cashier not found");
+                }
+
+                return member.balance;
+            });
     }
     getUserById(id) {
+        if(id === this.groupId) {
+            throw new Error(`Cashier is not treated as a user`)
+        }
+
         return this._client()
             .getUser({ id })
             .catch(notFoundHandler);

@@ -195,9 +195,24 @@ const refundGet = {
     }
 };
 
+const getBalance = {
+    method: 'GET',
+    path: '/cashier/balance',
+    handler: (request, h) => {
+        const { splitwise } = request.server.plugins.splitwise;
+
+        return splitwise.getBalance()
+            .then((balance) => ({amount: balance}))
+            .catch((err) => {
+                console.error(err);
+                return Boom.internal();
+            })
+    }
+};
+
 module.exports = {
     name: 'cashier',
     register: function(server, options) {
-        server.route([buyPost, buyGet, refundPost, refundGet]);
+        server.route([buyPost, buyGet, refundPost, refundGet, getBalance]);
     }
 };

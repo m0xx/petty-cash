@@ -26,8 +26,8 @@ const mapMember = (member) => ({
 })
 
 class Api {
-    constructor({consumerKey, consumerSecret, groupId, cashierId}) {
-        if(!consumerKey || !consumerSecret || !groupId || !cashierId) {
+    constructor({consumerKey, consumerSecret, groupId, cashierId, walletId}) {
+        if(!consumerKey || !consumerSecret || !groupId || !cashierId || !walletId) {
             throw new Error("missing params...")
         }
 
@@ -35,6 +35,7 @@ class Api {
         this.consumerSecret = consumerSecret;
         this.groupId = groupId;
         this.cashierId = cashierId;
+        this.walletId = walletId;
     }
     _client() {
         // TODO: could be better require server trip each time
@@ -43,22 +44,28 @@ class Api {
             consumerSecret: this.consumerSecret
         });
     }
+    _getBalance(userId) {
+        return this.getGroup()
+            .then(({members}) => members.map(mapMember))
+            .then((members) => members.find(({id}) => (id === userId)))
+            .then((member) => {
+                if(!member) {
+                    throw new Error("Member not found");
+                }
+
+                return member.balance;
+            });
+    }
     getUsers() {
         return this.getGroup()
             .then(({members}) => members.map(mapMember))
             .then((members) => members.filter(({id}) => (id !== this.cashierId)))
     }
     getBalance() {
-        return this.getGroup()
-            .then(({members}) => members.map(mapMember))
-            .then((members) => members.find(({id}) => (id === this.cashierId)))
-            .then((member) => {
-                if(!member) {
-                    throw new Error("Cashier not found");
-                }
-
-                return member.balance;
-            });
+        return this._getBalance(this.cashierId);
+    }
+    getWalletBalance() {
+        return this._getBalance(this.walletId);
     }
     getUserById(id) {
         if(id === this.groupId) {

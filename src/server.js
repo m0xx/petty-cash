@@ -1,6 +1,7 @@
 const Hapi = require('hapi');
 const {createFileDB} = require('./db');
 const apiPlugins = require('./api');
+const metricsPlugins = require('./metrics');
 const splitwisePlugin = require('./splitwise');
 
 const server = Hapi.server({
@@ -22,9 +23,12 @@ const dbPlugin = {
 
 async function start() {
     try {
+        server.event('credit');
+
         await server.register([
             splitwisePlugin,
             dbPlugin,
+            metricsPlugins,
             ...apiPlugins,
         ])
 

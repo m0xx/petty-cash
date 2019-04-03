@@ -102,6 +102,11 @@ const buyPost = {
         const { productId, userId, quantity } = request.payload;
 
         return cashierCredit({productId, userId, quantity, plugins})
+            .then((result) => {
+                request.server.events.emit('credit', {productId, userId, quantity});
+
+                return result;
+            })
             .catch((err) => {
                 if(err.message && err.message === 'not_found') {
                     return Boom.notFound();
@@ -129,6 +134,12 @@ const buyGet = {
         const { productId, userId, quantity } = request.query;
 
         return cashierCredit({productId, userId, quantity, plugins})
+            .then((result) => {
+                console.log('emit')
+                request.server.events.emit('credit', {productId, userId, quantity});
+
+                return result;
+            })
             .catch((err) => {
                 if(err.message && err.message === 'not_found') {
                     return Boom.notFound();
@@ -201,8 +212,14 @@ const getBalance = {
     handler: (request, h) => {
         const { splitwise } = request.server.plugins.splitwise;
 
-        return splitwise.getBalance()
-            .then((balance) => ({amount: balance}))
+        return Promise.all([
+                splitwise.getBalance(),
+                splitwise.getWalletBalance()
+            ])
+            .then(([balance, walletBalance]) => ({
+                amount: balance,
+                walletAmount: walletBalance
+            }))
             .catch((err) => {
                 console.error(err);
                 return Boom.internal();

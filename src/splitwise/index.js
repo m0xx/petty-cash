@@ -8,6 +8,7 @@ module.exports = {
             consumerSecret: process.env.SPLITWISE_SECRET,
             groupId: process.env.SPLITWISE_GROUP_ID,
             cashierId: process.env.SPLITWISE_CASHIER_ID,
+            walletId: process.env.SPLITWISE_WALLET_ID,
         }))
 
         server.route([]);

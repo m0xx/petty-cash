@@ -59,13 +59,14 @@ class Api {
     getUsers() {
         return this.getGroup()
             .then(({members}) => members.map(mapMember))
-            .then((members) => members.filter(({id}) => (id !== this.cashierId)))
+            .then((members) => members
+                .filter(({id}) => (id !== this.cashierId && id !== this.walletId)))
     }
     getBalance() {
         return this._getBalance(this.cashierId);
     }
     getWalletBalance() {
-        return this._getBalance(this.walletId);
+        return this._getBalance(this.walletId).then((balance) => (-1 * balance))
     }
     getUserById(id) {
         if(id === this.groupId) {

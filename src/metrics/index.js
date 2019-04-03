@@ -71,6 +71,14 @@ module.exports = {
                 })
         })
 
+        // Ensure metrics are collected on server start
+        server.events.on('start', () => {
+            const {store} = server.plugins.store;
+            const {splitwise} = server.plugins.splitwise;
+
+            collectMetrics(store, splitwise)
+        })
+
         setInterval(() => {
             const {store} = server.plugins.store;
             const {splitwise} = server.plugins.splitwise;

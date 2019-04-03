@@ -50,6 +50,7 @@ const updateProduct = {
             payload: {
                 name: Joi.string(),
                 description: Joi.string(),
+                image: Joi.string(),
                 price: Joi.number(),
                 quantity: Joi.number(),
             }

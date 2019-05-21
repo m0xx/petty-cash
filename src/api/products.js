@@ -60,13 +60,16 @@ const updateProduct = {
         const {store} = request.server.plugins.store;
         const { params: { productId }, payload: updateFields } = request;
 
-        return store.updateProduct(productId, updateFields).catch(err => {
-            if (err.message && err === 'not_found') {
-                return Boom.notFound();
-            }
+        return store.updateProduct(productId, updateFields)
+            .catch(err => {
+                if (err.message && err === 'not_found') {
+                    return Boom.notFound();
+                }
 
-            return Boom.internal();
-        });
+                console.log(err);
+
+                return Boom.internal();
+            });
     }
 };
 

@@ -217,7 +217,7 @@ const getBalance = {
                 splitwise.getWalletBalance()
             ])
             .then(([balance, walletBalance]) => ({
-                amount: balance,
+                amount: balance - walletBalance,
                 walletAmount: walletBalance
             }))
             .catch((err) => {
